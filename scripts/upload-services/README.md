@@ -1,0 +1,1 @@
+When the build is complete, upload the package simply to make it easier to download it directly for testing.

@@ -1,0 +1,38 @@
+*.[oa]
+*.o
+*.os
+*.template
+*.binding
+*.so
+*.dylib
+*.pyc
+
+# autotools
+aclocal.m4
+config.log
+config.status
+config.guess
+config.sub
+Makefile
+Makefile.in
+autom4te.cache
+stamp-h1
+libtool
+ltmain.sh
+install-sh
+depcomp
+.deps
+
+# OSX
+.DS_STORE
+
+# misc editor/tools
+*~
+*.swp
+*.kdev4
+.gdb_history
+core
+cscope.files
+cscope.out
+tags
+

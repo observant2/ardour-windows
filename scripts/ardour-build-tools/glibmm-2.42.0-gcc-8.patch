@@ -1,0 +1,9 @@
+--- a/glib/glibmm/threads.h  Sat Mar 19 11:20:36 2022
++++ b/glib/glibmm/threads.h  Sat Mar 19 11:21:00 2022
+@@ -610,3 +610,3 @@
+ 
+-  GPrivate* gobj() { return gobject_; }
++  GPrivate* gobj() { return &gobject_; }
+ 
+ private:
+   GPrivate gobject_;
