@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 #
 # THIS SCRIPT EXISTS FOR THE PURPOSE OF BUILDING THE ENTIRE STACK UP UPON WHICH ARDOUR DEPENDS
@@ -302,11 +302,9 @@ done
 # the third form is required for libjpeg whose packaging and naming is totally inconsistent
 #    with normal practice
 #
-# defmod 'xz' '5.2.2' "http://tukaani.org/xz/" 'bz2'
-defmod 'xz' '5.2.5' "http://tukaani.org/xz/" 'gz'
+defmod 'xz' '5.2.2' "http://tukaani.org/xz/" 'bz2'
 defmod 'tar' '1.27' "http://ftpmirror.gnu.org/tar/" 'bz2'
-# defmod 'libarchive' '3.2.1' "http://www.libarchive.org/downloads/" 'gz'
-defmod 'libarchive' '3.6.0' "https://www.libarchive.org/downloads/" 'gz'
+defmod 'libarchive' '3.2.1' "http://www.libarchive.org/downloads/" 'gz'
 defmod 'm4' '1.4.18' "http://ftpmirror.gnu.org/m4/" 'bz2'
 defmod 'autoconf' '2.69' "http://ftpmirror.gnu.org/autoconf/" 'xz'
 defmod 'automake' '1.14.1' "http://ftpmirror.gnu.org/automake/" 'gz'
@@ -320,13 +318,10 @@ defmod 'glib' '2.42.0' 'http://ftp.gnome.org/pub/gnome/sources/glib/2.42/' 'xz'
 defmod 'pkgconfig' 'pkg-config' '0.28' 'http://pkgconfig.freedesktop.org/releases/' 'gz'
 defmod 'termcap' '1.3.1' 'http://ftpmirror.gnu.org/termcap/' 'gz'
 defmod 'readline' '6.3' 'http://ftpmirror.gnu.org/readline/' 'gz'
-# defmod 'zlib' '1.2.7' 'ftp://ftp.simplesystems.org/pub/libpng/png/src/history/zlib/' 'bz2'
-defmod 'zlib' '1.2.7' 'https://sourceforge.net/projects/libpng/files/zlib/1.2.7/' 'bz2'
+defmod 'zlib' '1.2.7' 'ftp://ftp.simplesystems.org/pub/libpng/png/src/history/zlib/' 'bz2'
 defmod 'libiconv' '1.14' 'http://ftpmirror.gnu.org/libiconv/' 'gz'
-# defmod 'gettext' '0.19.3' 'http://ftpmirror.gnu.org/gettext/' 'gz'
-defmod 'gettext' '0.21' 'http://ftpmirror.gnu.org/gettext/' 'gz'
-# defmod 'expat' '2.1.0' 'http://prdownloads.sourceforge.net/expat/' 'gz'
-defmod 'expat' '2.4.7' 'https://sourceforge.net/projects/expat/files/expat/2.4.7/' 'gz'
+defmod 'gettext' '0.19.3' 'http://ftpmirror.gnu.org/gettext/' 'gz'
+defmod 'expat' '2.1.0' 'http://prdownloads.sourceforge.net/expat/' 'gz'
 defmod 'libxml2' '2.9.2' 'ftp://xmlsoft.org/libxslt/' 'gz'
 defmod 'libxslt' '1.1.28' 'ftp://xmlsoft.org/libxslt/' 'gz'
 defmod 'tiff' '4.0.3' 'http://download.osgeo.org/libtiff/old/' 'gz'
@@ -380,9 +375,7 @@ defmod lv2 lv2 1.18.2-g611759d http://ardour.org/files/deps/ bz2 lv2-1.18.2
 defmod curl 7.66.0 https://curl.haxx.se/download/ xz
 defmod taglib 1.9.1 http://taglib.github.io/releases/ gz
 defmod libwebsockets 4.3.0-14 http://ardour.org/files/deps/ gz
-# defmod vamp vamp-plugin-sdk 2.8.0 https://code.soundsoftware.ac.uk/attachments/download/2450/ gz
-# instead of code.soundsoftware.ac.uk due to curl: (60) ssl certificate problem: unable to get local issuer certificate
-defmod vamp vamp-plugin-sdk 2.8.0 http://mirror.sobukus.de/files/src/vamp-plugin-sdk/ gz
+defmod vamp vamp-plugin-sdk 2.8.0 https://code.soundsoftware.ac.uk/attachments/download/2450/ gz
 #defmod vamp vamp-plugin-sdk 2.9.0 https://code.soundsoftware.ac.uk/attachments/download/2588/ gz # vamp 2.9 need c++11
 defmod rubberband 1.8.1 http://code.breakfastquay.com/attachments/download/34/ bz2
 defmod cppunit 1.13.2 http://dev-www.libreoffice.org/src/ gz
@@ -693,8 +686,8 @@ fi
 ###################################
 
 # until we've got a new version of tar, we need to specify the compression type, which is a PITA
-tar xf $MOD_xz_local_tarball && (cd $MOD_xz_unpacked && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "xz build failed"
-tar xf $MOD_tar_local_tarball && (cd $MOD_tar_unpacked && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" FORCE_UNSAFE_CONFIGURE=1 ./configure $GLOBAL_CONF && make && make install) || die "tar build failed"
+tar jxf $MOD_xz_local_tarball && (cd $MOD_xz_unpacked && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" ./configure $GLOBAL_CONF && make && make install) || die "xz build failed"
+tar jxf $MOD_tar_local_tarball && (cd $MOD_tar_unpacked && LDFLAGS="-L$PREFIX/lib" CFLAGS="-I$PREFIX/include $GLOBAL_CFLAGS" FORCE_UNSAFE_CONFIGURE=1 ./configure $GLOBAL_CONF && make && make install) || die "tar build failed"
 
 # make sure we pick up the new version of tar that we just installed into $PREFIX
 hash tar
@@ -821,17 +814,17 @@ if [ x$explicit_intl != x ] ; then
     basic_builder libiconv
     if [ "$OSX_TARGET" == "i386" ]; then
         (
-        GLOBAL_CONF="$GLOBAL_CONF --with-included-gettext --with-libiconv-prefix=$PREFIX --enable-shared --host=i386 --build=i386 --disable-java --disable-csharp" \
+        GLOBAL_CONF="$GLOBAL_CONF --with-included-gettext --with-libiconv-prefix=$PREFIX --enable-shared --host=i386 --build=i386" \
         basic_builder gettext
         ) || die
     elif [ "$OSX_TARGET" == "ppc" ]; then
         (
-        GLOBAL_CONF="$GLOBAL_CONF --with-included-gettext --with-libiconv-prefix=$PREFIX --enable-shared --host=ppc --build=ppc --disable-java --disable-csharp" \
+        GLOBAL_CONF="$GLOBAL_CONF --with-included-gettext --with-libiconv-prefix=$PREFIX --enable-shared --host=ppc --build=ppc" \
         basic_builder gettext
         ) || die
     else
         (
-        GLOBAL_CONF="$GLOBAL_CONF --with-included-gettext --with-libiconv-prefix=$PREFIX --enable-shared --disable-java --disable-csharp" \
+        GLOBAL_CONF="$GLOBAL_CONF --with-included-gettext --with-libiconv-prefix=$PREFIX --enable-shared" \
         basic_builder gettext
         ) || die
     fi
@@ -1260,7 +1253,7 @@ exec_prefix=\${prefix}
 libdir=\${exec_prefix}/lib
 includedir=\${prefix}/include
 Name: NSS
-Version: 3.45
+Version: 3.25
 Description: Network Security S
 Libs: -L\${libdir} -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lnssutil3 -lpthread -ldl
 Cflags: -I\${includedir}/nss3 -I\${includedir}/nss3api -I\${includedir}/nss3private

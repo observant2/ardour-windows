@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  tools-builder:
+    build:
+      context: .
+      dockerfile: ./tools.Dockerfile
+    environment:
+      - XARCH=x86_64
+      - SRCDIR=/home/ardour/tmp/winsrc
+      - TMPDIR=/home/ardour/tmp
+      - ROOT=/home/ardour
+    volumes:
+      - ./ardour/:/home/ardour/src/
+      - ./scripts/:/home/ardour/scripts/
+      - ./win-stack-w64/:/home/ardour/win-stack-w64/
+      - ./win-build-w64/:/home/ardour/win-build-w64/
+
+  builder:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - XARCH=x86_64
+      - SRCDIR=/home/ardour/tmp/winsrc
+      - TMPDIR=/home/ardour/tmp
+      - ROOT=/home/ardour
+    volumes:
+      - ./ardour/:/home/ardour/src/
+      - ./scripts/:/home/ardour/scripts/
+      - ./win-stack-w64/:/home/ardour/win-stack-w64/
+      - ./win-build-w64/:/home/ardour/win-build-w64/

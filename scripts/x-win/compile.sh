@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# we assum this script is <ardour-build-src>/tools/x-win/compile.sh
+# we assume this script is <ardour-build-src>/tools/x-win/compile.sh
 pushd "`/usr/bin/dirname \"$0\"`" > /dev/null; this_script_dir="`pwd`"; popd > /dev/null
 cd "$this_script_dir/../../src"
 
@@ -36,9 +36,9 @@ if test -z "${ARDOURCFG}"; then
 	fi
 fi
 
-if test "$ENABLE_OPT" == "ON"; then
-	ARDOURCFG="$ARDOURCFG --optimize"
-fi
+# if test "$ENABLE_OPT" == "ON"; then
+# 	ARDOURCFG="$ARDOURCFG --optimize"
+# fi
 
 if [ "$(id -u)" = "0" ]; then
 	apt-get -qq -y install build-essential \

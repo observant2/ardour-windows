@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-
+#!/bin/bash
 # this script creates a windows32/64bit build-stack for Ardour
 # cross-compiled on GNU/Linux using gcc-8.2 (debian buster)
 #
@@ -114,8 +113,8 @@ fi
 ###############################################################################
 
 # clean up old buld-stack
-rm -rf ${PREFIX}
-rm -rf ${BUILDD}
+# rm -rf ${PREFIX}
+# rm -rf ${BUILDD}
 
 mkdir -p ${SRCDIR}
 mkdir -p ${BUILDD}
@@ -247,12 +246,11 @@ rm -rf drmingw
 tar xf ${SRCDIR}/drmingw.tar.xz
 cp -av drmingw/$WARCH/* "$PREFIX"/
 
-# src xz-5.2.2 tar.bz2 http://tukaani.org/xz/xz-5.2.2.tar.bz2
-src xz-5.2.5 tar.gz https://tukaani.org/xz/xz-5.2.5.tar.gz
+src xz-5.2.2 tar.bz2 http://tukaani.org/xz/xz-5.2.2.tar.bz2
 autoconfbuild
 
 # src zlib-1.2.7 tar.gz ftp://ftp.simplesystems.org/pub/libpng/png/src/history/zlib/zlib-1.2.7.tar.gz
-src zlib-1.2.7 tar.gz https://sourceforge.net/projects/libpng/files/zlib/1.2.7/zlib-1.2.7.tar.gz
+src zlib-1.2.12 tar.gz https://zlib.net/zlib-1.2.12.tar.gz
 make -fwin32/Makefile.gcc PREFIX=${XPREFIX}-
 make install -fwin32/Makefile.gcc SHARED_MODE=1 \
 	INCLUDE_PATH=${PREFIX}/include \
@@ -337,8 +335,7 @@ wq
 EOF
 autoconfbuild --enable-libxml2
 
-# src libarchive-3.2.1 tar.gz http://www.libarchive.org/downloads/libarchive-3.2.1.tar.gz
-src libarchive-3.6.1 tar.gz https://www.libarchive.org/downloads/libarchive-3.6.1.tar.gz
+src libarchive-3.2.1 tar.gz http://www.libarchive.org/downloads/libarchive-3.2.1.tar.gz
 autoconfbuild --disable-bsdtar --disable-bsdcat --disable-bsdcpio --without-openssl
 
 src pixman-0.38.4 tar.gz https://www.cairographics.org/releases/pixman-0.38.4.tar.gz
@@ -354,6 +351,11 @@ autoconfbuild --disable-gtk-doc-html --enable-gobject=no --disable-valgrind \
 	--enable-interpreter=no --enable-script=no
 
 src libffi-3.1 tar.gz ftp://sourceware.org/pub/libffi/libffi-3.1.tar.gz
+# see https://github.com/libffi/libffi/issues/552
+sed -i '2903s/mv/cp/g' ./configure
+sed -i '2904s/mv/cp/g' ./configure
+sed -i '2905s/mv/cp/g' ./configure
+sed -i '2906s/mv/cp/g' ./configure
 autoconfbuild
 
 # src gettext-0.19.3 tar.gz http://ftpmirror.gnu.org/gettext/gettext-0.19.3.tar.gz
@@ -478,8 +480,7 @@ src curl-7.66.0 tar.bz2 http://curl.haxx.se/download/curl-7.66.0.tar.bz2
 autoconfbuild --with-winssl
 
 # libsigc++-3 need need C++17
-#src libsigc++-3.0.2 tar.xz http://ftp.gnome.org/pub/GNOME/sources/libsigc++/3.0/libsigc++-3.0.2.tar.xz
-src libsigc++-2.10.3 tar.xz http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.10/libsigc++-2.10.3.tar.xz
+src libsigc++-2.10.2 tar.xz http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.10/libsigc++-2.10.2.tar.xz
 autoconfbuild
 
 src glibmm-2.62.0 tar.xz http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.62/glibmm-2.62.0.tar.xz
@@ -649,7 +650,7 @@ EOF
 
 ################################################################################
 
-src libwebsockets-4.3.0-14 tar.gz http://ardour.org/files/deps/libwebsockets-4.3.0-14.tar.gz
+src libwebsockets-4.3.0-13 tar.gz http://ardour.org/files/deps/libwebsockets-4.3.0-13.tar.gz
 rm -rf build/
 mkdir build && cd build
 cmake -DLWS_WITH_SSL=OFF -DLWS_WITH_EXTERNAL_POLL=ON -DMINGW=ON \
@@ -658,38 +659,8 @@ cmake -DLWS_WITH_SSL=OFF -DLWS_WITH_EXTERNAL_POLL=ON -DMINGW=ON \
 	-DCMAKE_C_FLAGS="-isystem ${PREFIX}/include ${STACKCFLAGS} -mstackrealign" \
 	-DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release \
 	..
-make $MAKEFLAGS && make install
 
-# FIX for mingw/poll
-patch $PREFIX/include/libwebsockets.h << EOF
---- libwebsockets.h	2021-10-13 16:32:08.271873281 +0200
-+++ libwebsockets.h	2021-10-13 16:31:47.012704554 +0200
-@@ -386,11 +386,20 @@
- typedef HANDLE lws_filefd_type;
- #endif
- 
-+struct lws_pollfd
-+{
-+        int fd;                     /* File descriptor to poll.  */
-+        short int events;           /* Types of events poller cares about.  */
-+        short int revents;          /* Types of events that actually occurred.  */
-+};
- 
--#define lws_pollfd pollfd
--#define LWS_POLLHUP	(POLLHUP)
--#define LWS_POLLIN	(POLLRDNORM | POLLRDBAND)
--#define LWS_POLLOUT	(POLLWRNORM)
-+#define LWS_POLLHUP (FD_CLOSE)
-+#define LWS_POLLIN (FD_READ | FD_ACCEPT)
-+#define LWS_POLLOUT (FD_WRITE)
-+
-+#if !defined(pid_t)
-+#define pid_t int
-+#endif
- 
- #else
- 
-EOF
+make $MAKEFLAGS && make install
 
 ################################################################################
 src libusb-1.0.20 tar.bz2 http://downloads.sourceforge.net/project/libusb/libusb-1.0/libusb-1.0.20/libusb-1.0.20.tar.bz2

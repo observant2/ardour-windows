@@ -1,2 +1,4 @@
 /ardour/
-/build-tools/
+/win-build-w64/
+/win-stack-w64/
+/.idea/

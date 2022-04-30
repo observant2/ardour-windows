@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 ### One stop script to cross-compile a ARM binary version of Ardour
 ### and dependencies from scratch and bundle it.
 ##
@@ -63,7 +63,7 @@ if test "$XARCH" = "arm64"; then
 	XPREFIX=aarch64-linux-gnu
 	WARCH=arm64
 	AARCH=aarch64
-	DEBIANPKGS="g++-aarch64-linux-gnu"
+	DEBIANPKGS="g++-6-aarch64-linux-gnu"
 elif test "$XARCH" = "armhf"; then
 	echo "Target: ARM Hard Float (armhf)"
 	XPREFIX=arm-linux-gnueabihf
@@ -211,12 +211,10 @@ rm -rf ${BUILDD}
 mkdir -p ${PREFIX}
 mkdir -p ${BUILDD}
 
-# src xz-5.2.2 tar.bz2 http://tukaani.org/xz/xz-5.2.2.tar.bz2
-src xz-5.2.5 tar.gz https://tukaani.org/xz/xz-5.2.5.tar.gz
+src xz-5.2.2 tar.bz2 http://tukaani.org/xz/xz-5.2.2.tar.bz2
 autoconfbuild
 
-# src zlib-1.2.7 tar.gz ftp://ftp.simplesystems.org/pub/libpng/png/src/history/zlib/zlib-1.2.7.tar.gz
-src zlib-1.2.7 tar.gz https://sourceforge.net/projects/libpng/files/zlib/1.2.7/zlib-1.2.7.tar.gz
+src zlib-1.2.7 tar.gz ftp://ftp.simplesystems.org/pub/libpng/png/src/history/zlib/zlib-1.2.7.tar.gz
 CHOST=${XPREFIX} ./configure --prefix=$PREFIX
 make
 make install
@@ -310,8 +308,7 @@ wq
 EOF
 autoconfbuild --enable-libxml2
 
-# src libarchive-3.2.1 tar.gz http://www.libarchive.org/downloads/libarchive-3.2.1.tar.gz
-src libarchive-3.6.0 tar.gz http://www.libarchive.org/downloads/libarchive-3.6.0.tar.gz
+src libarchive-3.2.1 tar.gz http://www.libarchive.org/downloads/libarchive-3.2.1.tar.gz
 autoconfbuild --disable-bsdtar --disable-bsdcat --disable-bsdcpio --without-openssl
 
 src pixman-0.38.4 tar.gz https://www.cairographics.org/releases/pixman-0.38.4.tar.gz
@@ -489,12 +486,11 @@ src nss-3.25 tar.gz https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_25_R
 	sed -i.bak "s/CCC\t\t\t=.*$/CCC=$XPREFIX-g++/" coreconf/Linux.mk
 	sed -i.bak "s/RANLIB\t\t\t=.*$/RANLIB=$XPREFIX-ranlib/" coreconf/Linux.mk
 	sed -i.bak 's/-m32$//;s/-Di386$//;s/x86$/arm/' coreconf/Linux.mk
-	sed -i.bak 's/strncpy(cp, "..\/", 3);/memcpy(cp, "..\/", 3);/g' coreconf/nsinstall/pathsub.c
 if test "$XARCH" = "arm64"; then
 	sed -i.bak 's/-DMP_ASSEMBLY_MULTIPLY -DMP_ASSEMBLY_SQUARE/-DNSS_USE_64/;s/-DSHA_NO_LONG_LONG//;s/mpi_arm.c//' lib/freebl/Makefile
 fi
 	sed -i.bak 's/cmd external_tests//' manifest.mn
-	CROSS_COMPILE=1 MAKEFLAGS=-j1 XCFLAGS="-I${PREFIX}/include/ -Wno-int-in-bool-context" \
+	CROSS_COMPILE=1 MAKEFLAGS=-j1 XCFLAGS="-I${PREFIX}/include/" \
 		make nss_build_all BUILD_OPT=1 NSDISTMODE=copy NSPR_CONFIGURE_OPTS="--target=${XPREFIX} --build=x86_64-linux" NATIVE_CC=gcc
 	cp -L ../dist/*.OBJ/lib/*.so $PREFIX/lib/
 	cp -L ../dist/*.OBJ/lib/*.a $PREFIX/lib/
@@ -507,7 +503,7 @@ exec_prefix=\${prefix}
 libdir=\${exec_prefix}/lib
 includedir=\${prefix}/include
 Name: NSS
-Version: 3.25
+Version: 3.45
 Description: Network Security S
 Libs: -L\${libdir} -lssl3 -lsmime3 -lnss3 -lplds4 -lplc4 -lnspr4 -lnssutil3 -lpthread -ldl
 Cflags: -I\${includedir}/nss3 -I\${includedir}/nss3api -I\${includedir}/nss3private
@@ -540,18 +536,6 @@ src libsigc++-2.4.1 tar.xz http://ftp.gnome.org/pub/GNOME/sources/libsigc++/2.4/
 autoconfbuild
 
 src glibmm-2.42.0 tar.xz http://ftp.gnome.org/pub/GNOME/sources/glibmm/2.42/glibmm-2.42.0.tar.xz
-# glibmm-2.42.0-gcc-8.patch, similar with https://bugs.gentoo.org/654776
-patch -p1 << EOF
---- a/glib/glibmm/threads.h  Sat Mar 19 11:20:36 2022
-+++ b/glib/glibmm/threads.h  Sat Mar 19 11:21:00 2022
-@@ -610,3 +610,3 @@
- 
--  GPrivate* gobj() { return gobject_; }
-+  GPrivate* gobj() { return &gobject_; }
- 
- private:
-   GPrivate gobject_;
-EOF
 autoconfbuild
 
 src cairomm-1.11.2 tar.gz http://cairographics.org/releases/cairomm-1.11.2.tar.gz
@@ -673,7 +657,7 @@ EOF
 
 ################################################################################
 
-src libwebsockets-4.3.0-14 tar.gz http://ardour.org/files/deps/libwebsockets-4.3.0-14.tar.gz
+src libwebsockets-4.3.0-13 tar.gz http://ardour.org/files/deps/libwebsockets-4.3.0-13.tar.gz
 rm -rf build/
 mkdir build && cd build
 cmake -DLWS_WITH_SSL=OFF -DLWS_WITH_GLIB=ON \
@@ -701,16 +685,15 @@ fi  # $NOSTACK
 ################################################################################
 # CHECK OUT ARDOUR & GMSYNTH
 
-# ARDOURSRC=${BUILDROOT}/ardour
-ARDOURSRC=${ROOT}/src
+ARDOURSRC=${BUILDROOT}/ardour
 GMSYNTHSRC=${BUILDROOT}/gmsynth.lv2
 mkdir -p $ARDOURSRC
 
 # create a git cache to speed up future clones
-# if test ! -d ${SRCDIR}/ardour.git.reference; then
-# 	git clone --mirror git://git.ardour.org/ardour/ardour.git ${SRCDIR}/ardour.git.reference
-# fi
-# git clone --reference ${SRCDIR}/ardour.git.reference git://git.ardour.org/ardour/ardour.git $ARDOURSRC || true
+if test ! -d ${SRCDIR}/ardour.git.reference; then
+	git clone --mirror git://git.ardour.org/ardour/ardour.git ${SRCDIR}/ardour.git.reference
+fi
+git clone --reference ${SRCDIR}/ardour.git.reference git://git.ardour.org/ardour/ardour.git $ARDOURSRC || true
 
 if test ! -d ${SRCDIR}/gmsynth.lv2.git.reference; then
 	git clone --mirror http://github.com/x42/gmsynth.lv2.git ${SRCDIR}/gmsynth.lv2.git.reference
